@@ -58,13 +58,23 @@ target_include_directories(IotLedLight PRIVATE
         ${PICO_SDK_PATH}/lib/lwip/contrib/examples/example_app/
         ${PICO_SDK_PATH}/src/rp2_common/pico_lwip/include/
         ${PICO_SDK_PATH}/src/rp2_common/pico_rand/include/
-        ${PICO_SDK_PATH}/lib/lwip/test/unit
+        
 )
 
 # Add any user requested libraries
 target_link_libraries(IotLedLight 
-         pico_stdlib FreeRTOS-Kernel-Heap4 pico_lwip_mqtt 
+         pico_stdlib FreeRTOS-Kernel-Heap4 pico_lwip_mqtt pico_cyw43_arch_lwip_sys_freertos
         )
 
+target_compile_definitions(IotLedLight PRIVATE LWIP_TIMEVAL_PRIVATE=0 LWIP_POSIX_SOCKETS_IO_NAMES=0)
+
 pico_add_extra_outputs(IotLedLight)
+
+if(DEFINED WIFI_SSID)
+    target_compile_definitions(IotLedLight PRIVATE WIFI_SSID="${WIFI_SSID}")
+endif()
+
+if(DEFINED WIFI_PASS)
+    target_compile_definitions(IotLedLight PRIVATE WIFI_PASS="${WIFI_PASS}")
+endif()
 
