@@ -9,7 +9,7 @@
 
 // ----- Memory pools (tweak if you see OOM) -----
 #define MEM_ALIGNMENT          4
-#define MEM_SIZE               (50 * 1024)
+#define MEM_SIZE               (70 * 1024)
 
 #define MEMP_NUM_TCP_PCB       8
 #define MEMP_NUM_UDP_PCB       4
@@ -34,6 +34,10 @@
 
 // ----- Checksum (use hardware/driver where possible) -----
 #define CHECKSUM_BY_HARDWARE   0
+
+#define LWIP_TIMERS              1
+
+#define MEMP_NUM_SYS_TIMEOUT     32 
 
 // ----- MQTT app -----
 #define LWIP_ALTCP             0
