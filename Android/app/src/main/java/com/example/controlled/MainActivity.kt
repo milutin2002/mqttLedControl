@@ -76,7 +76,10 @@ fun LedControllScreen(){
             }
             Log.i("ConnectInfo","Reached connection stage")
             MqttController.subscribeStatus(onMessage = {msg->
-                lastLedStatus = "Led status $msg"
+                scope.launch (Dispatchers.Main){
+                    lastLedStatus = "Led status $msg"
+                }
+
 
             }, onError = {
                 e->statusText="Subscribe error $e"
