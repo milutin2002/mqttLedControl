@@ -31,6 +31,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.controlled.ui.theme.ControlLedTheme
+import io.reactivex.plugins.RxJavaPlugins
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
@@ -39,6 +40,9 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+        RxJavaPlugins.setErrorHandler { e ->
+            android.util.Log.e("RxJava", "Unhandled error", e)
+        }
         setContent {
             ControlLedTheme {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
@@ -64,11 +68,17 @@ fun LedControllScreen(){
     LaunchedEffect(Unit) {
         MqttController.createClient(broker, brokerPort = 8883)
         MqttController.connect(onConnected = {
-            statusText="Connected"
+            try {
+                Log.i("Connection", "Established")
+                statusText = "Connected"
+            }catch (e:Exception){
+                Log.e("MQTT", "onMessage error", e)
+            }
             Log.i("ConnectInfo","Reached connection stage")
-            MqttController.subscribeStatus(onMessage = {msg->{
-                lastLedStatus="Led status $msg"
-            }}, onError = {
+            MqttController.subscribeStatus(onMessage = {msg->
+                lastLedStatus = "Led status $msg"
+
+            }, onError = {
                 e->statusText="Subscribe error $e"
             })
         }, onError = {e->{
@@ -91,10 +101,9 @@ fun LedControllScreen(){
             })}, modifier = Modifier.weight(1f)) {
                 Text("Turn LED off")
             }
-
-            Spacer(Modifier.height(12.dp))
-            lastLedStatus?.let { Text(text = it) }
         }
+        Spacer(Modifier.height(12.dp))
+        lastLedStatus?.let { Text(text = it) }
     }
 
 }
