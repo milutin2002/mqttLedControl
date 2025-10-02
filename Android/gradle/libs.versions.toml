@@ -1,5 +1,6 @@
 [versions]
 agp = "8.13.0"
+hivemqMqttClient = "develop-SNAPSHOT"
 kotlin = "2.0.21"
 coreKtx = "1.10.1"
 junit = "4.13.2"
@@ -13,6 +14,11 @@ orgEclipsePahoClientMqttv3 = "1.2.5"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
+hivemq-mqtt-client = { module = "com.github.hivemq.hivemq-mqtt-client:hivemq-mqtt-client", version.ref = "hivemqMqttClient" }
+hivemq-mqtt-client-epoll = { module = "com.github.hivemq.hivemq-mqtt-client:hivemq-mqtt-client-epoll", version.ref = "hivemqMqttClient" }
+hivemq-mqtt-client-proxy = { module = "com.github.hivemq.hivemq-mqtt-client:hivemq-mqtt-client-proxy", version.ref = "hivemqMqttClient" }
+hivemq-mqtt-client-reactor = { module = "com.github.hivemq.hivemq-mqtt-client:hivemq-mqtt-client-reactor", version.ref = "hivemqMqttClient" }
+hivemq-mqtt-client-websocket = { module = "com.github.hivemq.hivemq-mqtt-client:hivemq-mqtt-client-websocket", version.ref = "hivemqMqttClient" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }
 androidx-espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espressoCore" }

@@ -1,6 +1,7 @@
 package com.example.controlled
 
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -19,6 +20,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -31,14 +33,7 @@ import androidx.compose.ui.unit.dp
 import com.example.controlled.ui.theme.ControlLedTheme
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import org.eclipse.paho.android.service.MqttAndroidClient
-import org.eclipse.paho.client.mqttv3.IMqttActionListener
-import org.eclipse.paho.client.mqttv3.IMqttDeliveryToken
-import org.eclipse.paho.client.mqttv3.IMqttToken
-import org.eclipse.paho.client.mqttv3.MqttCallback
-import org.eclipse.paho.client.mqttv3.MqttClient
-import org.eclipse.paho.client.mqttv3.MqttConnectOptions
-import org.eclipse.paho.client.mqttv3.MqttMessage
+
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -60,101 +55,40 @@ fun LedControllScreen(){
     val context= LocalContext.current
     val scope= rememberCoroutineScope()
 
-    val broker =remember {   "tcp://broker.emqx.io:1883"}
+    val broker =  "broker.emqx.io"
     var statusText by remember { mutableStateOf("Disconnected") }
 
     var lastLedStatus by remember{ mutableStateOf<String?>(null) }
 
 
-    var client by remember { mutableStateOf<MqttAndroidClient?>(null) };
-    val topicSet= remember { "pico/led/set" }
-    val topicStatus =remember { "pico/led/status" }
-    fun connect(){
-        val cId="android-"+ System.currentTimeMillis()
-        val c= MqttAndroidClient(context,broker,cId)
-        client=c
-        c.setCallback(object : MqttCallback{
-            override fun connectionLost(cause: Throwable?) {
-                statusText="Disconnected"
-            }
-
-            override fun messageArrived(
-                topic: String?,
-                message: MqttMessage?
-            ) {
-                if(topic==topicStatus && message!=null){
-                    val msg=message.toString()
-                    lastLedStatus=msg
-                    statusText="Led status: $msg"
-                }
-            }
-
-            override fun deliveryComplete(token: IMqttDeliveryToken?) {
-                TODO("Not yet implemented")
-            }
-
-        })
-        val opts= MqttConnectOptions().apply {
-            isAutomaticReconnect=true
-            isCleanSession=true
-        }
-        statusText="Connecting"
-        c.connect(opts,null,object : IMqttActionListener{
-            override fun onSuccess(asyncActionToken: IMqttToken?) {
-                statusText="Connected"
-                c.subscribe(topicStatus,0,null,object : IMqttActionListener{
-                    override fun onSuccess(asyncActionToken: IMqttToken?) {
-                        statusText="Ready to listen"
-                    }
-
-                    override fun onFailure(
-                        asyncActionToken: IMqttToken?,
-                        exception: Throwable?
-                    ) {
-                        statusText="Subscribe failed"
-                    }
-                })
-            }
-
-            override fun onFailure(
-                asyncActionToken: IMqttToken?,
-                exception: Throwable?
-            ) {
-                statusText="Failed to connect"
-            }
-        })
+    LaunchedEffect(Unit) {
+        MqttController.createClient(broker, brokerPort = 8883)
+        MqttController.connect(onConnected = {
+            statusText="Connected"
+            Log.i("ConnectInfo","Reached connection stage")
+            MqttController.subscribeStatus(onMessage = {msg->{
+                lastLedStatus="Led status $msg"
+            }}, onError = {
+                e->statusText="Subscribe error $e"
+            })
+        }, onError = {e->{
+            statusText="Connection failed: $e"
+        }})
     }
-    fun publish(payload: String){
-        val c=client?: run {
-            statusText="Not connected"
-            return
-        }
-        if(!c.isConnected){
-            statusText="Not connected"
-            return
-        }
-        scope.launch(Dispatchers.IO) {
-            try{
-                val msg = MqttMessage(payload.toByteArray()).apply {
-                    qos=0
-                    isRetained=false
-                }
-                c.publish(topicSet,msg)
-                statusText="Sending payload"
-            }catch (e: Exception){
-                statusText="Sending error: ${e.message}"
-            }
-        }
-    }
-    connect()
     Column (Modifier.padding(20.dp)){
+        Text(text = statusText, style = MaterialTheme.typography.titleLarge)
+        Spacer(Modifier.padding(12.dp))
         Text(text = "IOT LED (Mqtt)", style = MaterialTheme.typography.titleLarge)
         Spacer(Modifier.padding(12.dp))
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)){
-            Button(onClick = {publish("ON")}, modifier = Modifier.weight(1f)) {
+            Button(onClick = { MqttController.publishSet("ON", onError = {e->
+                statusText="Publish error $e"
+            })}, modifier = Modifier.weight(1f)) {
                 Text("Turn LED on")
             }
-            Button(onClick = {publish("OFF")}, modifier = Modifier.weight(1f)) {
+            Button(onClick = {MqttController.publishSet("OFF", onError = {e->
+                statusText="Publish error $e"
+            })}, modifier = Modifier.weight(1f)) {
                 Text("Turn LED off")
             }
 
@@ -162,6 +96,7 @@ fun LedControllScreen(){
             lastLedStatus?.let { Text(text = it) }
         }
     }
+
 }
 
 @Composable
