@@ -63,7 +63,7 @@ Android app sends control messages and is intended to display status updates (cu
 [![Watch the video](Images/led_demo_thumbnail.png)](Images/led_demo.mp4)
 
 ### 🔹 Android Control Demo
-[![Watch the video](Images/android_demo_thumbnail.png)](Images/android_demo.mp4)
+[![Watch the video](Images/android_demo_thumbnail.png)](Images/android.mp4)
 
 ## 🐞 Known Issues / To Do
 
