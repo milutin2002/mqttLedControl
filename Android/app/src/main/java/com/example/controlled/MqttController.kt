@@ -18,7 +18,7 @@ object MqttController {
             return
         }
         Log.i("Creating","Creating client")
-        client= MqttClient.builder().useMqttVersion3().sslWithDefaultConfig().identifier(clientId).serverHost(brokerHost).serverPort(brokerPort).buildAsync()
+        client= MqttClient.builder().useMqttVersion3().identifier(clientId).serverHost(brokerHost).serverPort(brokerPort).buildAsync()
 
     }
 
@@ -37,10 +37,17 @@ object MqttController {
     @SuppressLint("CheckResult")
     fun subscribeStatus(onMessage:(String)->Unit,onError: (Throwable) -> Unit){
         val c=client?: return onError(IllegalStateException("Client not created"))
-        c.subscribeWith().topicFilter("pico/led/status").qos(MqttQos.AT_MOST_ONCE).callback {
+        c.subscribeWith().topicFilter("pico/led/status").qos(MqttQos.AT_LEAST_ONCE).callback {
                 publish ->
-                val payload = publish.payload.orElse(null)?.let { String(it.array(), StandardCharsets.UTF_8) } ?: ""
-                onMessage(payload)
+                val buf=publish.payload.orElse(null)
+                val payload = if(buf!=null){
+                    val dup=buf.slice()
+                    val bytes= ByteArray(dup.remaining())
+                    dup.get(bytes)
+                    String(bytes, StandardCharsets.UTF_8)
+                }
+            else ""
+            onMessage(payload)
 
         }.send().
                 whenComplete { _,t->

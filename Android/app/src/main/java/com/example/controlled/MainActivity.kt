@@ -66,7 +66,7 @@ fun LedControllScreen(){
 
 
     LaunchedEffect(Unit) {
-        MqttController.createClient(broker, brokerPort = 8883)
+        MqttController.createClient(broker, brokerPort = 1883)
         MqttController.connect(onConnected = {
             try {
                 Log.i("Connection", "Established")
@@ -84,9 +84,9 @@ fun LedControllScreen(){
             }, onError = {
                 e->statusText="Subscribe error $e"
             })
-        }, onError = {e->{
+        }, onError = {e->
             statusText="Connection failed: $e"
-        }})
+        })
     }
     Column (Modifier.padding(20.dp)){
         Text(text = statusText, style = MaterialTheme.typography.titleLarge)
