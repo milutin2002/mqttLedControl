@@ -24,27 +24,24 @@ object MqttController {
 
     fun connect(onConnected:()->Unit, onError:(Throwable)-> Unit){
         val c=client?: return onError(IllegalStateException("Client not created"))
-        c.connect().whenComplete { _,t ->{
+        c.connect().whenComplete { _,t ->
             if(t!=null){
                 onError(t)
             }
             else{
                 onConnected()
             }
-        } }
+         }
 
     }
     @SuppressLint("CheckResult")
     fun subscribeStatus(onMessage:(String)->Unit,onError: (Throwable) -> Unit){
         val c=client?: return onError(IllegalStateException("Client not created"))
-        c.subscribeWith().topicFilter(topicStatus).qos(MqttQos.AT_MOST_ONCE).callback {
+        c.subscribeWith().topicFilter("#").qos(MqttQos.AT_MOST_ONCE).callback {
                 publish ->
-            {
-                val payload =
-                    publish.payload.orElse(null)?.let { String(it.array(), StandardCharsets.UTF_8) }
-                        ?: ""
+                val payload = publish.payload.orElse(null)?.let { String(it.array(), StandardCharsets.UTF_8) } ?: ""
                 onMessage(payload)
-            }
+
         }.send().
                 whenComplete { _,t->{
                     if(t!=null){

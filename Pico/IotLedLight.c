@@ -58,6 +58,11 @@ static void onData(void *arg,const u8_t *data,u16_t len,u8_t flags){
     }
     xQueueSend(queueHandle,&cmd,0);
 }
+static void publishData(const char *data){
+    if(mqtt_client_is_connected(mq)){
+        mqtt_publish(mq,TOPIC_STATUS,data,strlen(data),0,1,NULL,NULL);
+    }
+}
 static void onConnect(mqtt_client_t *client,void *arg,mqtt_connection_status_t st){
     if(st==MQTT_CONNECT_ACCEPTED){
         printf("MQTT connected\n");
@@ -135,6 +140,13 @@ void blinkTask(void *param){
     while(true){
         if(xQueueReceive(queueHandle,&cmd,portMAX_DELAY)){
             gpio_put(LED_PIN,cmd==LED_ON_MSG);
+            if(cmd==LED_ON_MSG){
+                printf("Sending data ON");
+                publishData("ON");
+            }
+            else{
+                publishData("OFF");
+            }
         }
         //msg_t msg= ledState?LED_OFF_MSG:LED_ON_MSG;
         //xQueueSend(queueHandle,&msg,0);
