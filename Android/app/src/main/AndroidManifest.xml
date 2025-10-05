@@ -12,7 +12,6 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.ControlLed">
-        <service android:name="org.eclipse.paho.android.service.MqttService" android:exported="false"/>
         <activity
             android:name=".MainActivity"
             android:exported="true"

@@ -17,6 +17,18 @@ android {
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
+    packaging {
+        resources {
+            excludes += "META-INF/INDEX.LIST"
+            excludes += "META-INF/io.netty.versions.properties"
+            // (optional, if you hit more duplicates)
+            excludes += "META-INF/DEPENDENCIES"
+            excludes += "META-INF/LICENSE"
+            excludes += "META-INF/LICENSE.txt"
+            excludes += "META-INF/NOTICE"
+            excludes += "META-INF/NOTICE.txt"
+        }
+    }
 
     buildTypes {
         release {
@@ -57,7 +69,12 @@ dependencies {
     debugImplementation(libs.androidx.compose.ui.tooling)
     debugImplementation(libs.androidx.compose.ui.test.manifest)
 
-    implementation(libs.org.eclipse.paho.client.mqttv3)
-    implementation(libs.org.eclipse.paho.android.service)
-    implementation("androidx.localbroadcastmanager:localbroadcastmanager:1.1.0")
+
+
+
+    implementation("com.hivemq:hivemq-mqtt-client:1.3.9")
+    implementation(platform("com.hivemq:hivemq-mqtt-client-websocket:1.3.9"))
+    implementation(platform("com.hivemq:hivemq-mqtt-client-proxy:1.3.9"))
+    implementation(platform("com.hivemq:hivemq-mqtt-client-epoll:1.3.9"))
+    implementation("com.hivemq:hivemq-mqtt-client-reactor:1.3.9")
 }
