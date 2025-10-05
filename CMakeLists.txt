@@ -66,7 +66,7 @@ target_link_libraries(IotLedLight
          pico_stdlib FreeRTOS-Kernel-Heap4 pico_lwip_mqtt pico_cyw43_arch_lwip_sys_freertos
         )
 
-target_compile_definitions(IotLedLight PRIVATE LWIP_TIMEVAL_PRIVATE=0 LWIP_POSIX_SOCKETS_IO_NAMES=0)
+target_compile_definitions(IotLedLight PRIVATE LWIP_TIMEVAL_PRIVATE=0 LWIP_POSIX_SOCKETS_IO_NAMES=0 PICO_CYW43_ARCH_TREADSAFE_BACKGROUND=1)
 
 pico_add_extra_outputs(IotLedLight)
 
