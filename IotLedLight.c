@@ -91,9 +91,9 @@ void mqttTask( void * _){
     while(true){
         if(!mqtt_client_is_connected(mq)){
             printf("MQTT connecting\n");
-            cyw43_arch_lwip_begin();
+           // cyw43_arch_lwip_begin();
             mqtt_client_connect(mq,&broker_ip,MQTT_PORT,onConnect,NULL,&ci);
-            cyw43_arch_lwip_end();
+            //cyw43_arch_lwip_end();
         }
         vTaskDelay(pdMS_TO_TICKS(5000));
     }
