@@ -25,6 +25,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -60,33 +61,37 @@ fun LedControllScreen(){
     val scope= rememberCoroutineScope()
 
     val broker =  "broker.emqx.io"
-    var statusText by remember { mutableStateOf("Disconnected") }
+    var statusText by rememberSaveable { mutableStateOf("Disconnected") }
 
-    var lastLedStatus by remember{ mutableStateOf<String?>(null) }
+    var lastLedStatus by remember { mutableStateOf<String?>("OFF") }
 
+    var firstTime by rememberSaveable { mutableStateOf<Boolean>(false) }
 
     LaunchedEffect(Unit) {
-        MqttController.createClient(broker, brokerPort = 1883)
-        MqttController.connect(onConnected = {
-            try {
-                Log.i("Connection", "Established")
-                statusText = "Connected"
-            }catch (e:Exception){
-                Log.e("MQTT", "onMessage error", e)
-            }
-            Log.i("ConnectInfo","Reached connection stage")
-            MqttController.subscribeStatus(onMessage = {msg->
-                scope.launch (Dispatchers.Main){
-                    lastLedStatus = "Led status $msg"
+        if(!firstTime) {
+            MqttController.createClient(broker, brokerPort = 1883)
+            MqttController.connect(onConnected = {
+                try {
+                    Log.i("Connection", "Established")
+                    statusText = "Connected"
+                } catch (e: Exception) {
+                    Log.e("MQTT", "onMessage error", e)
                 }
+                Log.i("ConnectInfo", "Reached connection stage")
+                MqttController.subscribeStatus(onMessage = { msg ->
+                    scope.launch(Dispatchers.Main) {
+                        lastLedStatus = "Led status $msg"
+                    }
 
 
-            }, onError = {
-                e->statusText="Subscribe error $e"
+                }, onError = { e ->
+                    statusText = "Subscribe error $e"
+                })
+            }, onError = { e ->
+                statusText = "Connection failed: $e"
             })
-        }, onError = {e->
-            statusText="Connection failed: $e"
-        })
+            firstTime=true
+        }
     }
     Column (Modifier.padding(20.dp)){
         Text(text = statusText, style = MaterialTheme.typography.titleLarge)
