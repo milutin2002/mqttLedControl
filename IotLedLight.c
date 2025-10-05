@@ -43,7 +43,8 @@ static void onData(void *arg,const u8_t *data,u16_t len,u8_t flags){
     u16_t n= len< (sizeof(buf)-1) ? len : (sizeof(buf)-1);
     memcpy(buf,data,n);
     buf[n]=0;
-    msg_t cmd;
+    msg_t cmd=LED_OFF_MSG;
+    printf("Received data\n");
     if(strncmp(buf,"ON",2)==0){
         cmd=LED_ON_MSG;
         printf("MSG on\n");
@@ -55,6 +56,7 @@ static void onData(void *arg,const u8_t *data,u16_t len,u8_t flags){
     else{
         printf("Got something else %s\n",buf);
     }
+    xQueueSend(queueHandle,&cmd,0);
 }
 static void onConnect(mqtt_client_t *client,void *arg,mqtt_connection_status_t st){
     if(st==MQTT_CONNECT_ACCEPTED){
@@ -129,9 +131,11 @@ void wifiTask(void * param){
 
 void blinkTask(void *param){
     bool ledState=false;
+    msg_t cmd=LED_ON_MSG;
     while(true){
-        ledState=!ledState;
-        gpio_put(LED_PIN,ledState);
+        if(xQueueReceive(queueHandle,&cmd,portMAX_DELAY)){
+            gpio_put(LED_PIN,cmd==LED_ON_MSG);
+        }
         //msg_t msg= ledState?LED_OFF_MSG:LED_ON_MSG;
         //xQueueSend(queueHandle,&msg,0);
         vTaskDelay(pdMS_TO_TICKS(1000));
