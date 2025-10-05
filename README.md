@@ -57,13 +57,21 @@ Pico publishes LED state updates to led/status.
 
 Android app sends control messages and is intended to display status updates (currently in progress).
 
+## 🎬 Demo Videos
+
+### 🔹 LED Toggle Demo
+[![Watch the video](Images/led_demo_thumbnail.png)](Images/led_demo.mp4)
+
+### 🔹 Android Control Demo
+[![Watch the video](Images/android_demo_thumbnail.png)](Images/android_demo.mp4)
+
 ## 🐞 Known Issues / To Do
+
+Improve UI of Android client.
 
 ## 📄 License
 
 MIT License – feel free to use and modify.
 
-Android app is not yet receiving published messages from Pico.
 
 
-Improve UI of Android client.
