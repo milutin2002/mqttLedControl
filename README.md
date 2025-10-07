@@ -60,10 +60,10 @@ Android app sends control messages and is intended to display status updates (cu
 ## 🎬 Demo Videos
 
 ### 🔹 LED Toggle Demo
-[Watch the video](Images/led_demo.gif)
+![Watch the video](Images/led.gif)
 
 ### 🔹 Android Control Demo
-[Watch the video](Images/android.gif)
+![Watch the video](Images/android.gif)
 
 ## 🐞 Known Issues / To Do
 
