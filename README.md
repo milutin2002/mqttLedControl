@@ -38,7 +38,7 @@ cd mqttLedControl
 cd pico
 mkdir build
 cd build
-cmake ..
+cmake -DWIFI_SSID="<wifi_name>" -DWIFI_PASS="<wifi_pass>" ..
 make
   </code>
 </pre>
